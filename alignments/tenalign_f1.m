@@ -1,4 +1,4 @@
-function [alignment_matrix, truePermu, initial_permutation, ACC_Pi, Loss_obj, Loss_pi] = tensor_align_f1_conTest(mode1_size, MaxMostOuterIter, thresholdResObj, str_factor, str_pi, k_cluster, trueRank, guessRank, str_row, str_col, str_entropy)
+function [alignment_matrix, truePermu, initial_permutation, ACC_Pi, Loss_obj, Loss_pi] = tenalign_f1(mode1_size, MaxMostOuterIter, thresholdResObj, str_factor, str_pi, k_cluster, trueRank, guessRank) %, str_row, str_col, str_entropy)
     % alignment_matrix: learned permutation matrix
     % truePermu: true permutation matrix
     % initial_permutation: the initialization pi matrix
@@ -213,7 +213,7 @@ function [alignment_matrix, truePermu, initial_permutation, ACC_Pi, Loss_obj, Lo
         Y1ktrED_times_AT = (Y1ktrED * (A.')).';
         Y1Y1T = Y1 * (Y1.');
         
-        [alignment_matrix] = LS_solver_f1_conTest(Y1Y1T, Y1ktrED_times_AT, lambda1, lambda2, lambda3, x0_init, mode1_size, str_row, str_col, str_entropy); %'noRow', 'noCol', 'noEntropy');
+        [alignment_matrix] = LS_solver_f1_conTest(Y1Y1T, Y1ktrED_times_AT, lambda1, lambda2, lambda3, x0_init, mode1_size, ' ', ' ', ' ');
         alignment_matrix
         imagesc(alignment_matrix);
 
@@ -225,12 +225,7 @@ function [alignment_matrix, truePermu, initial_permutation, ACC_Pi, Loss_obj, Lo
         % calculate the mode-1 product of Y times initPi
         Y_1modeproduct = ttm(Y, initPermu, 1);
         
-        %% 1. update A
-        % Y1_ = tenmat(Y_1modeproduct, 1); % mode-1 matricization of tensor (Y *1 Pi)
-        % Y1_ = double(Y1_);
-        % EkrD = khatrirao(E, D);
-        % Y1_ktrED = Y1_ * EkrD; % equaivlent to Y1_*khatrirao(E, D)
-        
+        %% 1. update A        
         Uy = {A, D, E};
         Y1_ktrED = mttkrp(Y_1modeproduct, Uy, 1);
 
@@ -262,11 +257,6 @@ function [alignment_matrix, truePermu, initial_permutation, ACC_Pi, Loss_obj, Lo
         % C = trueC;
 
         %% 4. update D
-        % Y2_ = tenmat(Y_1modeproduct, 2); % mode-2 matricization of tensor (Y *1 Pi)
-        % Y2_ = double(Y2_);
-        % EkrA = khatrirao(E, A);
-        % Y2_ktrEA = Y2_ * EkrA;
-
         Uy = {A, D, E};
         Y2_ktrEA = mttkrp(Y_1modeproduct, Uy, 2);
         ETE_times_ATA = ((E.')*E) .* ((A.')*A);
@@ -276,11 +266,6 @@ function [alignment_matrix, truePermu, initial_permutation, ACC_Pi, Loss_obj, Lo
         % D = trueD;
 
         %% 5. update E
-        % Y3_ = tenmat(Y_1modeproduct, 3); % mode-3 matricization of tensor (Y *1 Pi)
-        % Y3_ = double(Y3_);
-        % DkrA = khatrirao(D, A);
-        % Y3_ktrDA = Y3_ * DkrA;
-
         Uy = {A, D, E};
         Y3_ktrDA = mttkrp(Y_1modeproduct, Uy, 3);
         DTD_times_ATA = ((D.')*D) .* ((A.')*A);
